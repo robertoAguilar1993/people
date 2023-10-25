@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service("peopleService")
 public class PeopleServiceImpl implements PeopleService {
@@ -39,15 +40,15 @@ public class PeopleServiceImpl implements PeopleService {
             throw new BusinessException("Error en  G", "guardar infirmacion", "Error data");
         }
 
-        var peopleEntity = this.peopleMaper.convertPeopleVOToPeopleEntity(people);
-        var peopleVO = this.peopleMaper.convertPeopleEntityToPeopleVO(this.peopleRepository.save(peopleEntity));
+        PeopleEntity peopleEntity = this.peopleMaper.convertPeopleVOToPeopleEntity(people);
+        PeopleVO peopleVO = this.peopleMaper.convertPeopleEntityToPeopleVO(this.peopleRepository.save(peopleEntity));
 
         return peopleVO;
     }
 
     @Override
     public List<PeopleVO> getPeopleAll() throws PeopleDataException {
-        var results = this.peopleRepository.findAll();
+        List<PeopleEntity> results = this.peopleRepository.findAll();
         if(results == null || results.size() == 0){
             throw new RecordNotFoundException("No hay informacion", "Consulta de personas", "Data no found");
         }
@@ -56,11 +57,11 @@ public class PeopleServiceImpl implements PeopleService {
 
     @Override
     public PeopleVO getPeopleById(Integer id) throws PeopleDataException {
-        var people= this.peopleRepository.findById(id);
+        Optional<PeopleEntity> people= this.peopleRepository.findById(id);
         if (people.isEmpty()){
             throw new RecordNotFoundException("No exuste informacion","Fallo en la consulta", "Data not found");
         }
-        var peopleVO = this.peopleMaper.convertPeopleEntityToPeopleVO(people.get());
+        PeopleVO peopleVO = this.peopleMaper.convertPeopleEntityToPeopleVO(people.get());
 
         return peopleVO;
     }
@@ -68,18 +69,18 @@ public class PeopleServiceImpl implements PeopleService {
     @Override
     public PeopleVO updatePeople(PeopleVO peopleEntity) throws PeopleDataException {
         getPeopleById(peopleEntity.getId());
-        var peopleEntityConvert = this.peopleMaper.convertPeopleVOToPeopleEntity(peopleEntity);
-        var peopleVO = this.peopleMaper.convertPeopleEntityToPeopleVO(this.peopleRepository.save(peopleEntityConvert));
+        PeopleEntity peopleEntityConvert = this.peopleMaper.convertPeopleVOToPeopleEntity(peopleEntity);
+        PeopleVO peopleVO = this.peopleMaper.convertPeopleEntityToPeopleVO(this.peopleRepository.save(peopleEntityConvert));
 
         return peopleVO;
     }
 
     @Override
     public PeopleVO deletePeople(Integer id) throws PeopleDataException{
-        var people=this.peopleRepository.findById(id);
+        Optional<PeopleEntity> people=this.peopleRepository.findById(id);
         if (people.isPresent()){
             this.peopleRepository.delete(people.get());
-            var peopleVO = this.peopleMaper.convertPeopleEntityToPeopleVO(people.get());
+            PeopleVO peopleVO = this.peopleMaper.convertPeopleEntityToPeopleVO(people.get());
             return peopleVO;
         }
         throw new RecordNotFoundException("No existe informacion", "Fallo en la consulta", "Data not found");
